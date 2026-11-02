@@ -1090,7 +1090,7 @@ function GastoDialog({
                 {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,0).getDate()},(_,i)=>{const day=i+1;const iso=[calendarMonth.getFullYear(),String(calendarMonth.getMonth()+1).padStart(2,"0"),String(day).padStart(2,"0")].join("-");return <button type="button" key={day} aria-pressed={form.fecha===iso} onClick={()=>{setForm(v=>({...v,fecha:iso}));setCalendarOpen(false);}} className={`aspect-square rounded-lg text-sm transition ${form.fecha===iso?"bg-[#d8bc8a] font-bold text-[#24201e]":"hover:bg-white/10"}`}>{day}</button>;})}
               </div>
               <button type="button" className="mt-3 w-full rounded-lg border border-amber-300/30 py-2 text-sm text-amber-100 hover:bg-white/10" onClick={()=>{const d=new Date();setForm(v=>({...v,fecha:[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}));setCalendarOpen(false);}}>Hoy</button>
-            </div>
+            </div>}
           </div>
 
           <div className="md:col-span-2">
