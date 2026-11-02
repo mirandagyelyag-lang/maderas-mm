@@ -239,7 +239,7 @@ export default function Home() {
   async function handlePasswordReset(event) {
     event.preventDefault();
     const email = normalizeEmail(recoveryEmail);
-    if (!validateEmail(email)) { setMessage("Ingresa un correo electrónico válido."); return; }
+    if (validateEmail(email)) { setMessage("Ingresa un correo electrónico válido."); return; }
     setLoading(true); setMessage("");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/inicio` });
