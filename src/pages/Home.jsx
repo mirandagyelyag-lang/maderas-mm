@@ -634,7 +634,7 @@ export default function Home() {
         } else if (errorMessage.includes("already")) {
           setMessage("Ya existe una cuenta con ese correo.");
         } else {
-          setMessage("No pudimos crear la cuenta. Inténtalo nuevamente.");
+          setMessage(`No pudimos crear la cuenta: ${error.message || "Error desconocido"}${error.code ? ` (${error.code})` : ""}.`);
         }
 
         setLoading(false);
