@@ -226,6 +226,41 @@ export default function Home() {
   const [touched, setTouched] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") { setMode("new-password"); setAuthPanelOpen(true); setMessage(""); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handlePasswordReset(event) {
+    event.preventDefault();
+    const email = normalizeEmail(recoveryEmail);
+    if (!validateEmail(email)) { setMessage("Ingresa un correo electrónico válido."); return; }
+    setLoading(true); setMessage("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/inicio` });
+      if (error) throw error;
+      setMessage("Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Revisa también spam.");
+    } catch (error) { setMessage(error.message || "No se pudo enviar el enlace. Inténtalo nuevamente."); }
+    finally { setLoading(false); }
+  }
+
+  async function handleNewPassword(event) {
+    event.preventDefault();
+    if (newPassword.length < 8) { setMessage("La nueva contraseña debe tener al menos 8 caracteres."); return; }
+    setLoading(true); setMessage("");
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setNewPassword(""); setMessage("Contraseña actualizada. Ya puedes iniciar sesión."); setMode("login");
+      await supabase.auth.signOut();
+    } catch (error) { setMessage(error.message || "No se pudo actualizar la contraseña."); }
+    finally { setLoading(false); }
+  }
 
   const currentTheme = useMemo(
     () => obtenerTema(currentThemeId),
@@ -868,7 +903,20 @@ export default function Home() {
               </div>
             )}
 
-            {mode === "login" ? (
+            {mode === "recover" ? (
+              <form className="mm-premium-auth__form" onSubmit={handlePasswordReset}>
+                <label htmlFor="recovery-email">Correo electrónico de tu cuenta</label>
+                <input id="recovery-email" type="email" required autoComplete="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} placeholder="tu@correo.com" />
+                <button type="submit" disabled={loading} className="mm-premium-auth__submit">{loading ? "Enviando..." : "Enviar enlace de recuperación"}</button>
+                <button type="button" className="mm-premium-auth__text-button" onClick={() => { setMode("login"); setMessage(""); }}>Volver a iniciar sesión</button>
+              </form>
+            ) : mode === "new-password" ? (
+              <form className="mm-premium-auth__form" onSubmit={handleNewPassword}>
+                <label htmlFor="new-password">Nueva contraseña</label>
+                <input id="new-password" type="password" minLength={8} required autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+                <button type="submit" disabled={loading} className="mm-premium-auth__submit">{loading ? "Guardando..." : "Guardar nueva contraseña"}</button>
+              </form>
+            ) : mode === "login" ? (
               <form
                 className="mm-premium-auth__form"
                 onSubmit={handleLogin}
@@ -968,6 +1016,7 @@ export default function Home() {
                   <button
                     type="button"
                     className="mm-premium-auth__text-button"
+                    onClick={() => { setRecoveryEmail(login.email); setMessage(""); setMode("recover"); }}
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
