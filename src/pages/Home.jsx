@@ -881,15 +881,11 @@ export default function Home() {
               </div>
 
               <h2>
-                {mode === "login"
-                  ? "Vuelve a tu espacio."
-                  : "Crea tu acceso privado."}
+                {mode === "login" ? "Vuelve a tu espacio." : mode === "recover" ? "Recupera tu contraseña." : mode === "new-password" ? "Crea una nueva contraseña." : "Crea tu acceso privado."}
               </h2>
 
               <p>
-                {mode === "login"
-                  ? "Ingresa tus datos para continuar en Maderas M&M."
-                  : "Registra tus datos para comenzar a administrar la empresa."}
+                {mode === "login" ? "Ingresa tus datos para continuar en Maderas M&M." : mode === "recover" ? "Te enviaremos un enlace para recuperar el acceso a tu cuenta." : mode === "new-password" ? "Elige una contraseña segura para volver a ingresar." : "Registra tus datos para comenzar a administrar la empresa."}
               </p>
             </header>
 
