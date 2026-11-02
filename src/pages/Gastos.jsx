@@ -920,6 +920,8 @@ function GastoDialog({
   onSave,
   onClose,
 }) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const [form, setForm] =
     useState(() => {
       if (!gasto) {
@@ -1077,18 +1079,18 @@ function GastoDialog({
           <div>
             <Label>Fecha</Label>
 
-            <Input
-              type="date"
-              value={form.fecha}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  fecha:
-                    event.target.value,
-                })
-              }
-              className="mt-1 [color-scheme:dark]"
-            />
+            <button type="button" aria-label="Abrir calendario" aria-expanded={calendarOpen} onClick={() => {const d=new Date((form.fecha||new Date().toISOString().slice(0,10))+"T12:00:00");setCalendarMonth(new Date(d.getFullYear(),d.getMonth(),1));setCalendarOpen(v=>!v);}} className="mt-1 flex h-12 w-full items-center justify-between rounded-xl border border-amber-200/30 bg-background px-4 text-left transition hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/40">
+              <span className="flex items-center gap-3"><CalendarDays className="h-5 w-5 text-amber-400"/><span>{form.fecha?new Date(form.fecha+"T12:00:00").toLocaleDateString("es-CL",{day:"2-digit",month:"long",year:"numeric"}):"Elegir fecha"}</span></span><span className="text-amber-400">⌄</span>
+            </button>
+            {calendarOpen && <div className="relative z-50 mt-2 w-full max-w-sm rounded-2xl border border-amber-300/30 bg-[#24201e] p-4 text-stone-100 shadow-2xl">
+              <div className="mb-3 flex items-center justify-between"><button type="button" aria-label="Mes anterior" className="rounded-lg px-3 py-2 hover:bg-white/10" onClick={()=>setCalendarMonth(d=>new Date(d.getFullYear(),d.getMonth()-1,1))}>‹</button><strong className="capitalize text-amber-100">{calendarMonth.toLocaleDateString("es-CL",{month:"long",year:"numeric"})}</strong><button type="button" aria-label="Mes siguiente" className="rounded-lg px-3 py-2 hover:bg-white/10" onClick={()=>setCalendarMonth(d=>new Date(d.getFullYear(),d.getMonth()+1,1))}>›</button></div>
+              <div className="grid grid-cols-7 gap-1 text-center">
+                {["Lu","Ma","Mi","Ju","Vi","Sá","Do"].map(d=><span key={d} className="py-2 text-xs text-amber-200/70">{d}</span>)}
+                {Array.from({length:(new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1).getDay()+6)%7},(_,i)=><span key={"blank"+i}/>)}
+                {Array.from({length:new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,0).getDate()},(_,i)=>{const day=i+1;const iso=[calendarMonth.getFullYear(),String(calendarMonth.getMonth()+1).padStart(2,"0"),String(day).padStart(2,"0")].join("-");return <button type="button" key={day} aria-pressed={form.fecha===iso} onClick={()=>{setForm(v=>({...v,fecha:iso}));setCalendarOpen(false);}} className={`aspect-square rounded-lg text-sm transition ${form.fecha===iso?"bg-[#d8bc8a] font-bold text-[#24201e]":"hover:bg-white/10"}`}>{day}</button>;})}
+              </div>
+              <button type="button" className="mt-3 w-full rounded-lg border border-amber-300/30 py-2 text-sm text-amber-100 hover:bg-white/10" onClick={()=>{const d=new Date();setForm(v=>({...v,fecha:[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}));setCalendarOpen(false);}}>Hoy</button>
+            </div>
           </div>
 
           <div className="md:col-span-2">
